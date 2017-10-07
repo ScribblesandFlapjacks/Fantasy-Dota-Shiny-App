@@ -113,6 +113,10 @@ shinyServer(function(input, output, session) {
     selectInput("teamPanel3", h4("Team Two"), teams())
   })
   
+  output$teams4 <- renderUI({
+    selectInput("teamPanel4", h4("Team Three"), teams())
+  })
+  
   output$playersPanel1 <- renderUI({
     if(input$teamPanel1 == "All"){
       temp <- getAggData()
@@ -143,9 +147,20 @@ shinyServer(function(input, output, session) {
     selectInput("playersPanel3",h4("Player Two"),temp$Player)
   })
   
+  output$playersPanel4 <- renderUI({
+    if(input$teamPanel4 == "All"){
+      temp <- getAggData()
+    } else {temp <- getAggData()[getAggData()$Team == input$teamPanel4,]}
+    if(input$positionPanel4!="All"){
+      temp <- temp[temp$Role == input$positionPanel4,]
+    }
+    selectInput("playersPanel4",h4("Player Three"),c("None",temp$Player))
+  })
+  
   
   compPlayer1 <- callModule(bonusInfo, "compPlayer1")
   compPlayer2 <- callModule(bonusInfo, "compPlayer2")
+  compPlayer3 <- callModule(bonusInfo, "compPlayer3")
   
   lineupPlayer1 <- callModule(bonusInfo, "lineupPlayer1")
   lineupPlayer2 <- callModule(bonusInfo, "lineupPlayer2")
@@ -204,21 +219,52 @@ shinyServer(function(input, output, session) {
     temp[1] <- tempData[tempData$name == input$playersPanel3,]$fantasy_points
   })
   
+  compareBox3 <- reactive({
+    temp <- data.frame(input$playersPanel4,stringsAsFactors=F)
+    temp <- temp[0,]
+    tempData <- getCompleteData()
+    temp[1] <- tempData[tempData$name == input$playersPanel4,]$fantasy_points
+  })
+  
+  boxesToPlot <- reactive({
+    boxPlots <- list(compareBox(),compareBox2())
+    if(input$playersPanel4 != "None"){
+      boxPlots <- c(boxPlots, list(compareBox3()))
+    }
+    boxPlots
+  })
+  
+  namesToPlot <- reactive({
+    names <- c(input$playersPanel2,input$playersPanel3)
+    if(input$playersPanel4 != "None"){
+      names <- c(names, input$playersPanel4)
+    }
+    names
+  })
+  
   ##Boxplot Output
   output$compareBox <- renderPlot(
-    boxplot(list(compareBox(),compareBox2()), names = c(input$playersPanel2,input$playersPanel3))
+    boxplot(boxesToPlot(), names = namesToPlot())
   )
+  
+  getCompStats <- reactive({
+    compStats <- rbind(compPlayer1(),compPlayer2())
+    if(input$playersPanel4 != "None"){
+      compStats <- rbind(compStats, compPlayer3())
+    }
+    compStats
+  })
   
   ##Table Data
   compareStat <- reactive({
-    temp <- getAggData()[c(input$playersPanel2,input$playersPanel3),]
+    temp <- getAggData()[namesToPlot(),]
     temp[bonuses] <- t(t(temp[bonuses])*pointValues)
     temp <- transform(temp, Deaths = ifelse(Deaths > 10, 0, 3-(0.3*Deaths)))
     temp
   })
   
   ##Bonus Adjusted Table Output
-  output$adjustedCompTab <- renderTable(adjustedScores(rbind(compPlayer1(),compPlayer2()), compareStat()))
+  output$adjustedCompTab <- renderTable(adjustedScores(getCompStats(), compareStat()))
   #####
   
   #####Top Five Tab

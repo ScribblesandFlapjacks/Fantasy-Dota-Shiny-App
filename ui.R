@@ -14,12 +14,22 @@ dashboardPage(
                             uiOutput("playersPanel1")
            ),
            conditionalPanel(condition = "input.Panels==4",
-                            uiOutput("teams2"),
-                            selectInput("positionPanel2", label = h4("Position One"), choices = c("All","Core","Offlane","Support")),
-                            uiOutput("playersPanel2"),
-                            uiOutput("teams3"),
-                            selectInput("positionPanel3", label = h4("Position Two"), choices = c("All","Core","Offlane","Support")),
-                            uiOutput("playersPanel3")
+                            radioButtons("player","Player", c("All","P1","P2","P3"), inline=T),
+                            conditionalPanel(condition = "input.player == 'P1' | input.player == 'All'",
+                              uiOutput("teams2"),
+                              selectInput("positionPanel2", label = h4("Position One"), choices = c("All","Core","Offlane","Support")),
+                              uiOutput("playersPanel2")
+                            ),
+                            conditionalPanel(condition = "input.player == 'P2' | input.player == 'All'",
+                              uiOutput("teams3"),
+                              selectInput("positionPanel3", label = h4("Position Two"), choices = c("All","Core","Offlane","Support")),
+                              uiOutput("playersPanel3")
+                            ),
+                            conditionalPanel(condition = "input.player == 'P3' | input.player == 'All'",
+                              uiOutput("teams4"),
+                              selectInput("positionPanel4", label = h4("Position Three"), choices = c("All","Core","Offlane","Support")),
+                              uiOutput("playersPanel4")
+                            )
            ),
            conditionalPanel(condition = "input.Panels==2",
                             radioButtons("positionPanel4", label = h3("Position"), choices = c("All","Core","Offlane","Support"))
@@ -36,7 +46,10 @@ dashboardPage(
                                                     tabBox(tabPanel("Player 1",
                                                                     bonusInfoUI("compPlayer1")),
                                                            tabPanel("Player 2",
-                                                                    bonusInfoUI("compPlayer2")))),
+                                                                    bonusInfoUI("compPlayer2")),
+                                                           tabPanel("Player 3",
+                                                                    bonusInfoUI("compPlayer3"))
+                                                           )),
                       div(style = 'overflow-x: scroll', tableOutput("adjustedCompTab"))
                       ),
              tabPanel("Top Five", value=2,plotOutput("topFiveBox"), div(style = 'overflow-x: scroll', tableOutput("topFiveTab"))),
