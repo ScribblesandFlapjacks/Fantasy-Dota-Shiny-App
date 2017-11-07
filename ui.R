@@ -5,8 +5,8 @@ library(shinydashboard)
 dashboardPage(
   dashboardHeader(title = "Fantasy Dota"),
   dashboardSidebar(
-           conditionalPanel(condition="input.Panels==0",
-                            radioButtons("Dataset", label = "Include Previous Tournament Data", choices = c("Yes","No"))
+           conditionalPanel(condition="input.Panels==0"
+                            #radioButtons("Dataset", label = "Include Previous Tournament Data", choices = c("Yes","No"))
                             ),
            conditionalPanel(condition="input.Panels==1",
                             uiOutput("teams"),
@@ -14,12 +14,22 @@ dashboardPage(
                             uiOutput("playersPanel1")
            ),
            conditionalPanel(condition = "input.Panels==4",
-                            uiOutput("teams2"),
-                            selectInput("positionPanel2", label = h4("Position One"), choices = c("All","Core","Offlane","Support")),
-                            uiOutput("playersPanel2"),
-                            uiOutput("teams3"),
-                            selectInput("positionPanel3", label = h4("Position Two"), choices = c("All","Core","Offlane","Support")),
-                            uiOutput("playersPanel3")
+                            radioButtons("player","Player", c("All","P1","P2","P3"), inline=T),
+                            conditionalPanel(condition = "input.player == 'P1' | input.player == 'All'",
+                              uiOutput("teams2"),
+                              selectInput("positionPanel2", label = h4("Position One"), choices = c("All","Core","Offlane","Support")),
+                              uiOutput("playersPanel2")
+                            ),
+                            conditionalPanel(condition = "input.player == 'P2' | input.player == 'All'",
+                              uiOutput("teams3"),
+                              selectInput("positionPanel3", label = h4("Position Two"), choices = c("All","Core","Offlane","Support")),
+                              uiOutput("playersPanel3")
+                            ),
+                            conditionalPanel(condition = "input.player == 'P3' | input.player == 'All'",
+                              uiOutput("teams4"),
+                              selectInput("positionPanel4", label = h4("Position Three"), choices = c("All","Core","Offlane","Support")),
+                              uiOutput("playersPanel4")
+                            )
            ),
            conditionalPanel(condition = "input.Panels==2",
                             radioButtons("positionPanel4", label = h3("Position"), choices = c("All","Core","Offlane","Support"))
@@ -32,11 +42,15 @@ dashboardPage(
              tabPanel("Players",value=1, plotOutput("box"), div(style = 'overflow-x: scroll', tableOutput('statTab'))),
              tabPanel("Matches",value=7, div(style = 'overflow-x: scroll', dataTableOutput('matchStats'))),
              tabPanel("Averages",value=8, div(style = 'overflow-x: scroll', dataTableOutput("avgStats"))),
+             tabPanel("By Date", value = 7, div(style = 'overflow-x: scroll', dataTableOutput('byDateTable'))),
              tabPanel("Compare Players", value = 4, fluidRow(box(plotOutput("compareBox")),
                                                     tabBox(tabPanel("Player 1",
                                                                     bonusInfoUI("compPlayer1")),
                                                            tabPanel("Player 2",
-                                                                    bonusInfoUI("compPlayer2")))),
+                                                                    bonusInfoUI("compPlayer2")),
+                                                           tabPanel("Player 3",
+                                                                    bonusInfoUI("compPlayer3"))
+                                                           )),
                       div(style = 'overflow-x: scroll', tableOutput("adjustedCompTab"))
                       ),
              tabPanel("Top Five", value=2,plotOutput("topFiveBox"), div(style = 'overflow-x: scroll', tableOutput("topFiveTab"))),
