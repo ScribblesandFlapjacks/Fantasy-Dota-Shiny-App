@@ -8,9 +8,11 @@ library(anytime)
 
 
 
+
 shinyServer(function(input, output, session) {
   currentTournament <- 5401
   dataPull <- GET('https://api.opendota.com/api/explorer?sql=SELECT%0Aleagueid%2C%0Amatch_id%2C%0Astart_time%2C%0Aaccount_id%2C%0Anotable_players.name%2C%0Ateam_name%2C%0Afantasy_role%2C%0Alocalized_name%2C%0A0.3%20*%20kills%20%2B%20(3%20-%200.3%20*%20deaths)%20%2B%200.003%20*%20(last_hits%20%2B%20denies)%20%2B%200.002%20*%20gold_per_min%20%2B%20towers_killed%20%2B%20roshans_killed%20%2B%203%20*%20teamfight_participation%20%2B%200.5%20*%20observers_placed%20%2B%200.5%20*%20camps_stacked%20%2B%200.25%20*%20rune_pickups%20%2B%204%20*%20firstblood_claimed%20%2B%200.05%20*%20stuns%20as%20fantasy_points%2C%0Akills%2C%0Adeaths%2C%0A(last_hits%20%2B%20denies)%20as%20CS%2C%0Agold_per_min%2C%0Atowers_killed%2C%0Aroshans_killed%2C%0Ateamfight_participation%2C%0Aobservers_placed%2C%0Acamps_stacked%2C%0Arune_pickups%2C%0Afirstblood_claimed%2C%0Astuns%0Afrom%20matches%0Ajoin%20player_matches%20using(match_id)%0Ajoin%20leagues%20using(leagueid)%0Ajoin%20notable_players%20using(account_id)%0Ajoin%20heroes%20on%20player_matches.hero_id%3Dheroes.id%0Awhere%20leagueid%20%3D%205401%20AND%20(team_id%20IN%20(2163%2C1883502%2C39%2C3331948%2C15%2C1375614%2C2108395%2C1333179%2C1838315%2C2586976%2C5%2C46%2C350190%2C2512249%2C2640025%2C2581813%2C1846548%2C2672298))')
+
   
   data.raw <- rawToChar(dataPull$content)
   data.list <- fromJSON(data.raw)
@@ -22,6 +24,7 @@ shinyServer(function(input, output, session) {
   data.complete[data.complete$fantasy_role==3,]$fantasy_role <- "Offlane"
   data.complete[9:21]<-round(data.complete[,-c(1:8)],2)
   data.complete[3] <- lapply(data.complete[3],anydate)
+
   
   properColNames <- c("Player","Team","Role","Matches","Fantasy Points", "Kills", "Deaths", "CS", "GPM", "Towers", "Rosh",
                       "Teamfight", "Wards", "Camps", "Runes", "First B", "Stuns")
@@ -30,7 +33,7 @@ shinyServer(function(input, output, session) {
   
   bonuses <- c("Kills", "Deaths", "CS", "GPM", "Towers", "Rosh",
                "Teamfight", "Wards", "Camps", "Runes", "First B", "Stuns")
-  
+
   data.players <- data.complete[c(5,6,7)]
   data.players.unique <- unique(data.players)
   data.players.unique <- data.players.unique[order(data.players.unique$name),]
@@ -99,6 +102,7 @@ shinyServer(function(input, output, session) {
     data.complete
   })
   
+
   teams <- reactive({
     c("All", unique(getAggData()[order(getAggData()$Team),]$Team))
   })
@@ -406,7 +410,7 @@ shinyServer(function(input, output, session) {
     output$byDateTable <- renderDataTable(getByDateData())
   })
   #####
-  
+
   #####
   ##Adjusts Data With Bonuses
   adjustedScores <- function(bonusSet,data){
