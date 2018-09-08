@@ -5,6 +5,7 @@ library(shinydashboard)
 dashboardPage(
   dashboardHeader(title = "Fantasy Dota"),
   dashboardSidebar(
+           uiOutput("dateRange"),
            conditionalPanel(condition="input.Panels==0"
                             #radioButtons("Dataset", label = "Include Previous Tournament Data", choices = c("Yes","No"))
                             ),
@@ -27,13 +28,15 @@ dashboardPage(
                             ),
                             conditionalPanel(condition = "input.player == 'P3' | input.player == 'All'",
                               uiOutput("teams4"),
-                              selectInput("positionPanel4", label = h4("Position Three"), choices = c("All","Core","Offlane","Support")),
+                              selectInput("positionPanel5", label = h4("Position Three"), choices = c("All","Core","Offlane","Support")),
                               uiOutput("playersPanel4")
                             )
            ),
            conditionalPanel(condition = "input.Panels==2",
                             radioButtons("positionPanel4", label = h3("Position"), choices = c("All","Core","Offlane","Support"))
-                            )
+                            ),
+           conditionalPanel(condition = "input.Panels==5",
+                            uiOutput("teamList"))
          ),
   dashboardBody(
     useShinyjs(),
@@ -41,8 +44,8 @@ dashboardPage(
              tabPanel("About",value=0, includeHTML("About.html")),
              tabPanel("Players",value=1, plotOutput("box"), div(style = 'overflow-x: scroll', tableOutput('statTab'))),
              tabPanel("Matches",value=7, div(style = 'overflow-x: scroll', dataTableOutput('matchStats'))),
-             tabPanel("Averages",value=8, div(style = 'overflow-x: scroll', dataTableOutput("avgStats"))),
-             tabPanel("By Date", value = 7, div(style = 'overflow-x: scroll', dataTableOutput('byDateTable'))),
+             tabPanel("Averages",value=5, div(style = 'overflow-x: scroll', dataTableOutput("avgStats"))),
+             tabPanel("TI By Day", value = 7, div(style = 'overflow-x: scroll', dataTableOutput('byDateTable'))),
              tabPanel("Compare Players", value = 4, fluidRow(box(plotOutput("compareBox")),
                                                     tabBox(tabPanel("Player 1",
                                                                     bonusInfoUI("compPlayer1")),
@@ -72,5 +75,5 @@ dashboardPage(
              tabPanel("Heroes", value=6, div(style = 'overflow-x: scroll', dataTableOutput("heroTable"))),
              id="Panels"
            ),
-    tags$head(HTML("<script type='text/javascript' src='js/googleAnalytics.js'></script>")))
+    tags$head(includeHTML("www/googleAnalytics.js")))
 )

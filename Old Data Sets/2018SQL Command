@@ -1,0 +1,30 @@
+SELECT
+leagueid,
+match_id,
+start_time,
+account_id,
+notable_players.name,
+team_name,
+fantasy_role,
+localized_name,
+(0.3*kills+(3-0.3*deaths)+(0.003*(last_hits+denies))+0.002*gold_per_min+towers_killed+roshans_killed+3*teamfight_participation+0.5*observers_placed+0.5*camps_stacked+0.25*rune_pickups+4*firstblood_claimed+0.05*stuns) as fantasy_points,
+kills,
+deaths,
+(last_hits+denies) AS CS,
+gold_per_min,
+towers_killed,
+roshans_killed,
+teamfight_participation,
+observers_placed,
+camps_stacked,
+rune_pickups,
+firstblood_claimed,
+stuns
+FROM matches
+JOIN player_matches using(match_id)
+JOIN leagues using(leagueid)
+JOIN notable_players using(account_id)
+JOIN heroes on player_matches.hero_id = heroes.id
+WHERE matches.leagueid IN (9870, 9943)
+AND (team_id IN (5, 15, 39, 67, 2163, 350190, 543897, 726228, 1375614, 1838315, 1883502, 2108395, 2586976, 5026801, 5027210, 5066616, 5228654, 5229127)
+OR account_id IN (124936122,311360822,94054712))
